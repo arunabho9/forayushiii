@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"> 
+    <title>Surprise for Titi ❤️</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Great+Vibes&family=Poppins:wght@400;600;800&display=swap');
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; touch-action: manipulation; user-select: none; }
+        
+        body { 
+            margin: 0; padding: 0; height: 100vh; overflow: hidden; 
+            background-color: #fff0f5; font-family: 'Poppins', sans-serif;
+            display: flex; justify-content: center; align-items: center;
+        }
+
+        .bg-text {
+            position: absolute; bottom: -100px; color: #f48fb1; font-weight: bold;
+            font-size: 1.2rem; 
+            /* CHANGED: Increased opacity so they are less faded */
+            opacity: 0.7; 
+            pointer-events: none; z-index: 1;
+            animation: floatUpward linear forwards; font-family: 'Dancing Script', cursive;
+        }
+        @keyframes floatUpward {
+            0% { transform: translateY(0) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.7; }
+            100% { transform: translateY(-120vh) rotate(20deg); opacity: 0; }
+        }
+
+        .screen {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: none; flex-direction: column; 
+            justify-content: flex-start; 
+            align-items: center;
+            z-index: 10; text-align: center; padding: 60px 20px;
+        }
+        .active { display: flex; animation: fadeIn 0.5s ease; }
+        
+        #screen-unlock.active { justify-content: center; padding: 20px; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        #timer-box {
+            font-size: 1.8rem; font-weight: 800; color: #c2185b; background: white;
+            padding: 15px 30px; border-radius: 50px; margin-top: 20px;
+            box-shadow: 0 10px 25px rgba(194, 24, 91, 0.2); border: 3px solid #f8bbd0;
+        }
+
+        .btn {
+            background: #ff4081; color: white; border: none; padding: 15px 30px;
+            font-size: 1.1rem; border-radius: 30px; margin: 10px; cursor: pointer;
+            box-shadow: 0 5px 15px rgba(255, 64, 129, 0.3); font-weight: bold; 
+            width: 85%; max-width: 300px; z-index: 20;
+        }
+        .btn-secondary { background: white; color: #ff4081; border: 2px solid #ff4081; }
+
+        .progress-container { width: 85%; height: 16px; background: white; border-radius: 20px; position: relative; border: 2px solid #f8bbd0; margin-bottom: 30px; flex-shrink: 0; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #ff80ab, #f50057); width: 0%; border-radius: 20px; transition: width 0.5s ease; }
+        .progress-bear { position: absolute; top: -35px; transform: translateX(-50%); width: 45px; transition: left 0.5s ease; left: 0%; }
+
+        .env-wrapper { position: relative; cursor: pointer; transform: scale(0.95); z-index: 50; margin: 20px 0; }
+        .envelope { width: 300px; height: 180px; background: #f06292; position: relative; border-radius: 0 0 10px 10px; z-index: 2; box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+        .flap { position: absolute; top: 0; left: 0; border-left: 150px solid transparent; border-right: 150px solid transparent; border-top: 100px solid #ec407a; transform-origin: top; transition: 0.6s 0.2s; z-index: 3; }
+        
+        .letter { 
+            position: absolute; bottom: 10px; left: 10px; width: 280px; 
+            height: 160px; background: white; z-index: 1; transition: 0.8s ease-in-out; 
+            padding: 20px; font-family: 'Dancing Script', cursive; font-size: 1.15rem; 
+            overflow-y: auto; 
+            box-shadow: 0 -5px 10px rgba(0,0,0,0.1); border-radius: 5px; 
+            line-height: 1.6; text-align: left;
+        }
+        .letter::-webkit-scrollbar { width: 4px; }
+        .letter::-webkit-scrollbar-thumb { background: #ff80ab; border-radius: 10px; }
+
+        .env-wrapper.open .flap { transform: rotateX(180deg); z-index: 0; }
+        .env-wrapper.open .letter { height: 220px; transform: translateY(-140px); z-index: 4; }
+        
+        #options-container { display:flex; flex-direction:column; width:100%; align-items:center; min-height: 180px; margin-top: 10px; }
+        
+        .grid-game { 
+            display: grid; 
+            grid-template-columns: repeat(3, 1fr); 
+            gap: 12px; 
+            width: 100%; 
+            max-width: 280px; 
+            margin: 10px auto; 
+        }
+        .grid-item { 
+            font-size: 2rem; 
+            background: white; 
+            padding: 12px; 
+            border-radius: 15px; 
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1); 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            aspect-ratio: 1/1; 
+        }
+        .hidden { display: none !important; }
+        
+        .trail-heart { position: fixed; pointer-events: none; z-index: 999; animation: heartBurst 1.2s forwards; font-size: 24px; }
+        @keyframes heartBurst { 0% { transform: scale(0.5); opacity: 1; } 100% { transform: translate(var(--tx), var(--ty)) scale(1.2); opacity: 0; } }
+
+        #skip-timer { position: absolute; bottom: 15px; opacity: 0.1; font-size: 10px; color: #ff4081; cursor: pointer; }
+    </style>
+</head>
+<body onclick="handleGlobalClick(event)">
+
+    <audio id="bgm" loop><source src="https://www.bensound.com/bensound-music/bensound-memories.mp3" type="audio/mpeg"></audio>
+    <audio id="sfx-pop"><source src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3" type="audio/mpeg"></audio>
+    <audio id="sfx-trumpet" preload="auto"><source src="https://www.soundjay.com/misc/sounds/magic-chime-02.mp3" type="audio/mpeg"></audio>
+
+    <div id="screen-timer" class="screen active">
+        <img src="https://media.tenor.com/On7kvXcz9WAAAAAj/milk-and-mocha-hug.gif" style="width:140px;">
+        <h1 style="color:#d32f2f; margin: 10px 0;">Soon...</h1>
+        <div id="timer-box">00:00:00:00</div>
+        <p style="color:#e91e63; margin-top: 20px;">❤️ Counting down every heartbeat ❤️</p>
+        <div id="skip-timer" onclick="switchScreen('screen-envelope-lock')">Dev Unlock 🔓</div>
+    </div>
+
+    <div id="screen-envelope-lock" class="screen">
+        <h1 style="color:#d32f2f">A Gift for Titi 💌</h1>
+        <div class="env-wrapper" style="margin-top: 40px;" onclick="triggerLockedPopup()">
+            <div class="envelope"><div style="position: absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:50px;">🔒</div></div>
+            <div class="flap"></div>
+        </div>
+        <h3 style="color:#e91e63; margin-top: 30px;">Click the envelope! 💌</h3>
+    </div>
+
+    <div id="screen-quests" class="screen">
+        <div class="progress-container">
+            <div class="progress-fill" id="prog-bar"></div>
+            <img src="https://media.tenor.com/z3p5sYvQkQAAAAAj/milk-and-mocha-running.gif" class="progress-bear" id="prog-bear">
+        </div>
+        <img src="https://media.tenor.com/uJzT4KaZ0tUAAAAj/milk-and-mocha-cute.gif" style="width:100px; margin-bottom: 5px;" id="quest-img">
+        <h2 id="quest-q" style="color:#c2185b; padding:0 10px; margin: 5px 0; font-size: 1.2rem;">Question?</h2>
+        <div id="options-container"></div>
+        <div id="game-container" class="grid-game hidden"></div>
+    </div>
+
+    <div id="screen-reveal" class="screen">
+        <img src="https://media.tenor.com/J3iJb2s2kQkAAAAj/milk-and-mocha-dance.gif" style="width:140px;">
+        <h1 style="color:#d32f2f">Quest Complete! 🎉</h1>
+        <div id="generated-code" style="font-size:3.5rem; letter-spacing:8px; font-weight:800; color:#d32f2f; border:4px dashed #ff4081; padding:20px; background:white; border-radius:15px; margin: 15px 0;">----</div>
+        <button class="btn" onclick="switchScreen('screen-unlock')">I have memorized it!</button>
+    </div>
+
+    <div id="screen-unlock" class="screen">
+        <div id="input-phase">
+            <h1 style="color:#d32f2f">Enter the Code 🔐</h1>
+            <div style="display:flex; gap:10px; justify-content:center; margin-top: 20px;">
+                <input type="tel" maxlength="1" class="pin-digit" style="width:50px; height:60px; font-size:2rem; text-align:center; border:2px solid #e91e63; border-radius:10px; outline:none;" oninput="moveFocus(this, 0)" onkeydown="handleBackspace(event, 0)">
+                <input type="tel" maxlength="1" class="pin-digit" style="width:50px; height:60px; font-size:2rem; text-align:center; border:2px solid #e91e63; border-radius:10px; outline:none;" oninput="moveFocus(this, 1)" onkeydown="handleBackspace(event, 1)">
+                <input type="tel" maxlength="1" class="pin-digit" style="width:50px; height:60px; font-size:2rem; text-align:center; border:2px solid #e91e63; border-radius:10px; outline:none;" oninput="moveFocus(this, 2)" onkeydown="handleBackspace(event, 2)">
+                <input type="tel" maxlength="1" class="pin-digit" style="width:50px; height:60px; font-size:2rem; text-align:center; border:2px solid #e91e63; border-radius:10px; outline:none;" oninput="moveFocus(this, 3)" onkeydown="handleBackspace(event, 3)">
+            </div>
+            <p id="error-msg" style="display:none; color:red; margin-top: 15px;">Oops! Wrong code 🤭</p>
+        </div>
+
+        <div id="final-envelope-phase" style="display:none; flex-direction:column; align-items:center; width: 100%;">
+            <div class="env-wrapper" id="final-env" onclick="openLetter()">
+                <div class="envelope"></div><div class="flap"></div>
+                <div class="letter">
+                    <p>My Dearest Titi 💖,</p>
+                    <p>It’s crazy to think you’re only a few minutes away and I’m still sitting here missing you. Knowing you’re so close just makes me want to see you even more.</p>
+                    <p>I don’t need a fancy letter to say it—you’re my favorite person, and having you in my life is the best thing I’ve got going for me. You’re beautiful, you’re incredible, and I’m lucky you’re mine.</p>
+                    <p>Happy Valentine’s Day. I miss youu soooo muchhh. Love youuuu 💖💖💖</p>
+                    <span style="font-family: 'Great Vibes'; color:#d32f2f; font-size:1.8rem; display:block; text-align:right;">Forever Yours ❤️</span>
+                </div>
+            </div>
+            <h3 id="final-instruction" style="color:#e91e63; margin-top:20px;">Click & Scroll! 💌</h3>
+        </div>
+    </div>
+
+    <script>
+        const unlockDate = "February 14, 2026 00:00:00"; 
+        const secretCode = Math.floor(1000 + Math.random() * 9000).toString();
+        const wrongPhrases = ["Nope! 🤭", "Try again! 🙄", "Not today! 🌸", "Wrong! 💅"];
+        const bgTexts = ["I Love You", "Titi ❤️", "mwahhhh...", "Valentine", "Forever", "💖", "🧸", "💋"];
+
+        let currentQuestIdx = 0;
+        const quests = [
+            { type: "choice", q: "What is today?", a: "Valentine's Day ❤️", b: "Just a Saturday? 😐" },
+            { type: "game", q: "Find the hidden LOVE! ❤️", correct: "❤️", items: ["🌸","🎀","❤️","🧸","🍫","🍭","🌹","✨","🍒"] },
+            { type: "choice", q: "Who gives the best hugs?", a: "You do! 🧸", b: "The neighbor? 🏠" },
+            { type: "choice", q: "Whom do I love the most?", a: "Titi 🌸", b: "Pizza 🍕" },
+            { type: "game", q: "Catch the Bear! 🐻", correct: "🐻", items: ["🐱","🐶","🐰","🐻","🦊","🐼","🐸","🐷","🐨"] },
+            /* CHANGED QUESTION HERE - CORRECT IS AYUSHI */
+            { type: "choice", q: "Romeo : Juliet :: Arunabho : ?", a: "Ayushi ❤️", b: "Dhanishta 😆" },
+            { type: "choice", q: "Who is my favorite person?", a: "Titi ✨", b: "Dhanishta's sister 😆" },
+            { type: "game", q: "Pick the odd one out!", correct: "😈", items: ["😇","😇","😇","😇","😈","😇","😇","😇","😇"] },
+            { type: "choice", q: "Am I the luckiest guy alive?", a: "YES! 💯", b: "Maybe... 🤨" },
+            { type: "choice", q: "Will you be my Valentine?", a: "YES! ❤️", b: "No 💔" }
+        ];
+
+        function spawnFloatingText() {
+            const t = document.createElement("div");
+            t.className = "bg-text";
+            t.innerText = bgTexts[Math.floor(Math.random() * bgTexts.length)];
+            t.style.left = Math.random() * 90 + "vw";
+            t.style.animationDuration = (Math.random() * 4 + 6) + "s";
+            document.body.appendChild(t);
+            setTimeout(() => t.remove(), 10000);
+        }
+        setInterval(spawnFloatingText, 800);
+
+        function updateTimer() {
+            const diff = new Date(unlockDate).getTime() - new Date().getTime();
+            if (diff <= 0) { switchScreen('screen-envelope-lock'); clearInterval(timerInt); }
+            else {
+                const d = Math.floor(diff/86400000), h = Math.floor((diff%86400000)/3600000), m = Math.floor((diff%3600000)/60000), s = Math.floor((diff%60000)/1000);
+                document.getElementById("timer-box").innerText = `${d}d ${h}h ${m}m ${s}s`;
+            }
+        }
+        const timerInt = setInterval(updateTimer, 1000); updateTimer();
+
+        function loadQuest() {
+            const data = quests[currentQuestIdx];
+            document.getElementById("prog-bar").style.width = ((currentQuestIdx)/10)*100 + "%";
+            document.getElementById("prog-bear").style.left = ((currentQuestIdx)/10)*100 + "%";
+            document.getElementById("quest-q").innerText = data.q;
+            const container = document.getElementById("options-container");
+            const game = document.getElementById("game-container");
+            container.innerHTML = ""; game.innerHTML = "";
+
+            if (data.type === "choice") {
+                game.classList.add("hidden"); container.classList.remove("hidden");
+                const bA = document.createElement("button"); bA.className = "btn"; bA.innerText = data.a; bA.onclick = nextQuest;
+                const bB = document.createElement("button"); bB.className = "btn btn-secondary"; bB.id = "wrong-btn"; bB.innerText = data.b;
+                const isWho = data.q.toLowerCase().includes("who") || data.q.toLowerCase().includes("whom");
+                bB.onpointerenter = bB.onpointerdown = (e) => { e.preventDefault(); moveWrongButton(isWho); };
+                container.append(bA, bB);
+            } else {
+                container.classList.add("hidden"); game.classList.remove("hidden");
+                data.items.sort(()=>Math.random()-0.5).forEach(item => {
+                    const d = document.createElement("div"); d.className = "grid-item"; d.innerText = item;
+                    d.onclick = () => {
+                        if (item === data.correct) {
+                            nextQuest();
+                        } else {
+                            d.style.opacity = "0.2";
+                        }
+                    };
+                    game.appendChild(d);
+                });
+            }
+        }
+
+        function moveWrongButton(isWho) {
+            const btn = document.getElementById("wrong-btn");
+            btn.style.position = "fixed";
+            const x = Math.max(20, Math.random() * (window.innerWidth - 180));
+            const y = Math.max(window.innerHeight * 0.6, Math.random() * (window.innerHeight - 80));
+            btn.style.left = x + "px"; btn.style.top = y + "px";
+            btn.innerText = isWho ? "Dhanishtaaa 🤭" : wrongPhrases[Math.floor(Math.random() * wrongPhrases.length)];
+            document.getElementById('sfx-pop').play().catch(()=>{});
+        }
+
+        function nextQuest() { 
+            // Play success sound, ensuring volume is good
+            const audio = document.getElementById('sfx-trumpet');
+            audio.currentTime = 0;
+            audio.play().catch(()=>{}); 
+            
+            currentQuestIdx++; 
+            if(currentQuestIdx < 10) loadQuest(); else showReveal(); 
+        }
+
+        function showReveal() { 
+            switchScreen('screen-reveal'); 
+            document.getElementById("generated-code").innerText = secretCode; 
+            /* Confetti Trigger */
+            confetti({
+                particleCount: 150,
+                spread: 70,
+                origin: { y: 0.6 }
+            });
+        }
+        
+        function triggerLockedPopup() { alert("Oops! 🤭\nComplete all 10 quests to unlock the code!"); switchScreen('screen-quests'); loadQuest(); }
+        function switchScreen(id) { document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+        
+        function moveFocus(el, i) { 
+            if(el.value.length === 1 && i < 3) document.querySelectorAll('.pin-digit')[i+1].focus(); 
+            if(i===3) checkCode(); 
+        }
+
+        function handleBackspace(e, i) {
+            if (e.key === "Backspace") {
+                const inputs = document.querySelectorAll('.pin-digit');
+                inputs[i].value = ""; 
+                if (i > 0) inputs[i-1].focus(); 
+            }
+        }
+
+        function checkCode() { 
+            let pin = ""; document.querySelectorAll('.pin-digit').forEach(d=>pin+=d.value);
+            if(pin === secretCode) { 
+                document.getElementById('sfx-trumpet').play().catch(()=>{});
+                document.getElementById("input-phase").style.display="none"; 
+                document.getElementById("final-envelope-phase").style.display="flex"; 
+            }
+            else { 
+                document.getElementById("error-msg").style.display="block"; 
+                const inputs = document.querySelectorAll('.pin-digit');
+                inputs.forEach(d=>d.value=""); 
+                inputs[0].focus(); /* Reset cursor to start */
+            }
+        }
+
+        function openLetter() { 
+            document.getElementById("final-env").classList.toggle("open"); 
+            document.getElementById('bgm').play(); 
+            document.getElementById("final-instruction").innerText = "Happy Valentine's Day! ❤️";
+        }
+
+        function handleGlobalClick(e) {
+            for(let i=0; i<5; i++) {
+                const h = document.createElement("div"); h.className = "trail-heart"; h.innerText = "❤️";
+                h.style.left = e.clientX + "px"; h.style.top = e.clientY + "px";
+                h.style.setProperty('--tx', (Math.random() * 200 - 100) + 'px');
+                h.style.setProperty('--ty', (Math.random() * -200 - 50) + 'px');
+                document.body.appendChild(h); setTimeout(() => h.remove(), 1200);
+            }
+        }
+    </script>
+</body>
+</html>
