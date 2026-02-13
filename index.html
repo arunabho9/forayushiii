@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SYSTEM_SECURE_GATE</title>
+    <style>
+        body { background: #000; color: #0f0; font-family: 'Courier New', monospace; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; overflow: hidden; }
+        #hacker-console { display: none; width: 80%; text-align: left; }
+        .blink { animation: blinker 0.6s linear infinite; color: #ff0000; font-weight: bold; }
+        @keyframes blinker { 50% { opacity: 0; } }
+    </style>
+</head>
+<body onload="initGate()">
+
+    <div id="hacker-console">
+        <h1 class="blink">⚠️ INTRUSION ALERT ⚠️</h1>
+        <p>> SOURCE: UNAUTHORIZED_MAC_ADDRESS</p>
+        <p>> STATUS: EXTRACTING_BROWSER_HISTORY...</p>
+        <p>> LOGGING: IP_LOCATED_SCHOOL_SERVER</p>
+        <br>
+        <p class="blink">SYSTEM LOCKING IN 3... 2... 1...</p>
+    </div>
+
+    <script>
+        function initGate() {
+            // THE REDIRECT LOGIC
+            let key = prompt("RESTRICTED REPOSITORY.\nENTER 4-DIGIT AUTHORIZATION KEY:");
+            
+            if (key === "143") {
+                // REDIRECTS AUTOMATICALLY TO YOUR ROMANTIC PAGE
+                document.body.innerHTML = "<h2 style='color:white'>Decrypting... Please wait...</h2>";
+                setTimeout(() => {
+                    window.location.href = "love.html";
+                }, 1000);
+            } else {
+                // TRIGGERS THE SCARE FOR THE TEACHER
+                document.getElementById('hacker-console').style.display = 'block';
+                if(navigator.vibrate) navigator.vibrate([500, 200, 500, 200, 500]);
+            }
+        }
+    </script>
+</body>
+</html>
